@@ -1,3 +1,3 @@
-from FlaskTools import application
+from FlaskTools import application, HOST, PORT, DEBUG
 
-application.run(debug=True)
+application.run(host=HOST, port=PORT, debug=DEBUG)
