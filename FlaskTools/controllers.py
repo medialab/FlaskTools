@@ -4,14 +4,6 @@ from config import SOURCE_FOLDER, DATA_FOLDER
 import os, glob, markdown, json, codecs
 from docutils import core as rst2html
 
-def prepare_list_data(list_file):
-    index_list = json.load(list_file)
-
-    element_list = [index_list["element1"], index_list["element2"], index_list["element3"]]
-    element_list += index_list["elements4"]
-
-    return index_list, element_list
-
 def gather_element_data(elementname, element_meta_file, doc=None):
     element_data = json.load(element_meta_file)
     element_data["id"] = elementname
@@ -38,15 +30,23 @@ def find_readme(folder):
 @app.route("/index.htm")
 def index():
     with open(os.path.join(SOURCE_FOLDER, "index.json")) as list_file:
-        index_data, element_list = prepare_list_data(list_file)
-
-    for i, elementname in enumerate(element_list):
-        with codecs.open(os.path.join(DATA_FOLDER, elementname, "meta.json"), mode="r", encoding="utf-8") as meta:
-            element_data = gather_element_data(elementname, meta)
-            if i < 3:
-                index_data["element"+str(i+1)] = element_data
-            else:
-                index_data["elements4"][i-4] = element_data
+        index_list = json.load(list_file)
+    index_data = {}
+    for i in (1,2,3):
+        if "element%s" % i in index_list:
+            elementname = index_list["element%s" % i]
+            with codecs.open(os.path.join(DATA_FOLDER, elementname, "meta.json"), mode="r", encoding="utf-8") as meta:
+                index_data["element"+str(i+1)] = gather_element_data(elementname, meta)
+    if "elements4" in index_list:
+        index_data["elements4"] = []
+        for i, elementname in enumerate(index_list["elements4"]):
+            with codecs.open(os.path.join(DATA_FOLDER, elementname, "meta.json"), mode="r", encoding="utf-8") as meta:
+                index_data["elements4"].append(gather_element_data(elementname, meta))
+    if "otherelements" in index_list:
+        index_data["otherelements"] = []
+        for i, elementname in enumerate(index_list["otherelements"]):
+            with codecs.open(os.path.join(DATA_FOLDER, elementname, "meta.json"), mode="r", encoding="utf-8") as meta:
+                index_data["otherelements"].append(gather_element_data(elementname, meta))
 
     return render_template("index.html", **index_data)
 
