@@ -5,7 +5,10 @@ import os, glob, markdown, json, codecs
 from docutils import core as rst2html
 
 def gather_element_data(elementname, element_meta_file):
-    element_data = json.load(element_meta_file)
+    try:
+        element_data = json.load(element_meta_file)
+    except:
+        element_data = {'name': "%s (error with meta.json)" % elementname}
     result = {}
     result["id"] = elementname
     result["title"] = element_data["name"]
