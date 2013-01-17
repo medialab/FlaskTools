@@ -6,12 +6,16 @@ from docutils import core as rst2html
 
 def gather_element_data(elementname, element_meta_file):
     element_data = json.load(element_meta_file)
-    element_data["id"] = elementname
-    element_data["title"] = element_data["name"]
+    result = {}
+    result["id"] = elementname
+    result["title"] = element_data["name"]
+    for key, value in element_data.iteritems():
+        if value:
+            result[key] = value
     doc = find_readme(os.path.join(DATA_FOLDER, elementname))
     if doc is not None:
-        element_data["readme_html"] = doc
-    return element_data
+        result["readme_html"] = doc
+    return result
 
 def find_readme(folder):
     matches = glob.glob(os.path.join(folder, "[rR][eE][aA][dD][mM][eE]*.[mM][dD]")) + glob.glob(os.path.join(folder, "[rR][eE][aA][dD][mM][eE]*.[rR][sS][tT]"))
