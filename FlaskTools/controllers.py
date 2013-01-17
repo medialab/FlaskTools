@@ -36,7 +36,7 @@ def index():
         if "element%s" % i in index_list:
             elementname = index_list["element%s" % i]
             with codecs.open(os.path.join(DATA_FOLDER, elementname, "meta.json"), mode="r", encoding="utf-8") as meta:
-                index_data["element"+str(i+1)] = gather_element_data(elementname, meta)
+                index_data["element"+str(i)] = gather_element_data(elementname, meta)
     if "elements4" in index_list:
         index_data["elements4"] = []
         for i, elementname in enumerate(index_list["elements4"]):
