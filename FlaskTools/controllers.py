@@ -27,7 +27,7 @@ def find_readme(folder):
             with codecs.open(matches[0], mode="r", encoding="utf-8") as readme:
                 text = readme.read()
                 if readme.name.lower().endswith("md"):
-                    return markdown.markdown(text)
+                    return markdown.markdown(text, extensions=["markdown.extensions.fenced_code"])
                 else:
                     html = rst2html.publish_string(source=text, writer_name='html')
                     return html[html.find('<body>')+6:html.find('</body>')].strip().decode('utf-8')
