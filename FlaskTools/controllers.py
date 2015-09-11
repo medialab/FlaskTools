@@ -1,7 +1,7 @@
 from flask import render_template
 from FlaskTools import config, application as app
 from config import SOURCE_FOLDER, DATA_FOLDER
-import os, glob, markdown, json, codecs
+import os, re, glob, markdown, json, codecs
 from docutils import core as rst2html
 
 def gather_element_data(elementname, element_meta_file):
@@ -15,17 +15,20 @@ def gather_element_data(elementname, element_meta_file):
     for key, value in element_data.iteritems():
         if value:
             result[key] = value
-    doc = find_readme(os.path.join(DATA_FOLDER, elementname))
+    doc = find_readme(os.path.join(DATA_FOLDER, elementname), element_data['source'])
     if doc is not None:
         result["readme_html"] = doc
     return result
 
-def find_readme(folder):
+re_rel_links = re.compile(r'(\[[^]]+\]\()([^)]+)\)')
+clean_rel_links = lambda md, source: re_rel_links.sub(lambda x: '%s%s)' % (x.group(1), (x.group(2) if x.group(2).lower().startswith('http') else '%s/blob/master/%s' % (source.strip('/'), x.group(2).strip('/')))), md)
+def find_readme(folder, source):
     matches = glob.glob(os.path.join(folder, "[rR][eE][aA][dD][mM][eE]*.[mM][dD]")) + glob.glob(os.path.join(folder, "[rR][eE][aA][dD][mM][eE]*.[rR][sS][tT]"))
     if len(matches) > 0:
         try:
             with codecs.open(matches[0], mode="r", encoding="utf-8") as readme:
                 text = readme.read()
+                text = clean_rel_links(text, source)
                 if readme.name.lower().endswith("md"):
                     return markdown.markdown(text, extensions=["markdown.extensions.fenced_code"])
                 else:
