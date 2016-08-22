@@ -44,22 +44,44 @@ def find_readme(folder, source):
 def index():
     with open(os.path.join(SOURCE_FOLDER, "index.json")) as list_file:
         index_list = json.load(list_file)
-    index_data = {}
+    index_data = {"sidebar": []}
     for i in (1,2,3):
         if "element%s" % i in index_list:
             elementname = index_list["element%s" % i]
-            with codecs.open(os.path.join(DATA_FOLDER, elementname, "meta.json"), mode="r", encoding="utf-8") as meta:
-                index_data["element"+str(i)] = gather_element_data(elementname, meta)
+            try:
+                with codecs.open(os.path.join(DATA_FOLDER, elementname, "meta.json"), mode="r", encoding="utf-8") as meta:
+                    index_data["element"+str(i)] = gather_element_data(elementname, meta)
+                    index_data["sidebar"].append(index_data["element"+str(i)])
+            except: pass
     if "elements4" in index_list:
         index_data["elements4"] = []
         for i, elementname in enumerate(index_list["elements4"]):
-            with codecs.open(os.path.join(DATA_FOLDER, elementname, "meta.json"), mode="r", encoding="utf-8") as meta:
-                index_data["elements4"].append(gather_element_data(elementname, meta))
+            try:
+                with codecs.open(os.path.join(DATA_FOLDER, elementname, "meta.json"), mode="r", encoding="utf-8") as meta:
+                    index_data["elements4"].append(gather_element_data(elementname, meta))
+                    index_data["sidebar"].append(index_data["elements4"][-1])
+            except: pass
+    if "moreelements" in index_list:
+        index_data["moreelements"] = []
+        for section in index_list["moreelements"]:
+            idxsection = {
+                "name": section["name"],
+                "elements": []
+            }
+            try:
+                for i, elementname in enumerate(section["elements"]):
+                    with codecs.open(os.path.join(DATA_FOLDER, elementname, "meta.json"), mode="r", encoding="utf-8") as meta:
+                        idxsection["elements"].append(gather_element_data(elementname, meta))
+                        index_data["sidebar"].append(idxsection["elements"][-1])
+            except: pass
+            index_data["moreelements"].append(idxsection)
     if "otherelements" in index_list:
         index_data["otherelements"] = []
         for i, elementname in enumerate(index_list["otherelements"]):
-            with codecs.open(os.path.join(DATA_FOLDER, elementname, "meta.json"), mode="r", encoding="utf-8") as meta:
-                index_data["otherelements"].append(gather_element_data(elementname, meta))
+            try:
+                with codecs.open(os.path.join(DATA_FOLDER, elementname, "meta.json"), mode="r", encoding="utf-8") as meta:
+                    index_data["otherelements"].append(gather_element_data(elementname, meta))
+            except: pass
 
     return render_template("index.html", **index_data)
 
