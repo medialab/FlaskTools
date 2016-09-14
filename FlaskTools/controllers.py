@@ -14,6 +14,8 @@ def gather_element_data(elementname, element_meta_file):
     result["title"] = element_data["name"]
     for key, value in element_data.iteritems():
         if value:
+            if key == "visual" and not value.startswith("http"):
+                value = "%s/%s" % (elementname, value)
             result[key] = value
     doc = find_readme(os.path.join(DATA_FOLDER, elementname), element_data['source'])
     if doc is not None:
